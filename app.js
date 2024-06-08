@@ -2,6 +2,7 @@ const express = require("express");
 const pgp = require('pg-promise')();
 const cors = require("cors");
 const morgan = require("morgan");
+const bodyParser = require("body-parser");
 
 //! CONTROLLERS
 const users = require("./controllers/usersController");
@@ -21,6 +22,8 @@ const db = pgp(`postgres://${pgUser}:${pgPassword}@${pgHost}:${pgPort}/${pgDatab
 
 //! MIDDLEWARE
 app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: ['http://localhost:3000'] }));
 app.use(morgan("tiny"));
 
