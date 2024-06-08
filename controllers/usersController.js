@@ -1,7 +1,9 @@
 const { Router } = require("express");
-// use multipart form for uploading profile image
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+
 const {
     registerUser,
     loginUser,
@@ -11,8 +13,31 @@ const {
     deleteUser
 } = require("../queries/users");
 
-const users = Router();
+// Ensure the Images directory exists
+const imageDir = path.join(__dirname, '../Images');
+if (!fs.existsSync(imageDir)) {
+    fs.mkdirSync(imageDir);
+}
 
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, imageDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + uuidv4();
+        const extension = path.extname(file.originalname);
+        cb(null, uniqueSuffix + extension);
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+});
+
+const users = Router();
 
 // register new user
 users.post("/register", async (req, res) => {
@@ -27,7 +52,7 @@ users.post("/register", async (req, res) => {
 });
 
 // login user
-users.post("/login", async(req, res) => {
+users.post("/login", async (req, res) => {
     try {
         const loginReturningUser = await loginUser(req.body);
         if (loginReturningUser.error) {
@@ -42,7 +67,7 @@ users.post("/login", async(req, res) => {
 });
 
 // get all users
-users.get("/", async(req, res) => {
+users.get("/", async (req, res) => {
     try {
         const allUsers = await getAllUsers(req.body);
         console.table(allUsers);
@@ -53,11 +78,10 @@ users.get("/", async(req, res) => {
     }
 });
 
-// get user with a giving id
-users.get("/:id", async(req, res) => {
+// get user with a given id
+users.get("/:id", async (req, res) => {
     try {
         const userId = req.params.id;
-
         const userWithThisId = await getUserById(userId);
         console.table(userWithThisId);
         res.status(200).json(userWithThisId);
@@ -68,13 +92,11 @@ users.get("/:id", async(req, res) => {
 });
 
 // update user's data
-users.patch("/:id", upload.single('profile_img'), async(req, res) => {
+users.patch("/:id", upload.single('profile_img'), async (req, res) => {
     try {
         const userId = req.params.id;
         const { firstname, lastname, email, username, password } = req.body;
-        const profile_img = req.file.filename;
-        // const profile_img = req.file ? req.file.filename : undefined;
-        console.log(req.get('file'));
+        const profile_img = req.file ? req.file.filename : undefined;
 
         // Validate required fields
         if (!firstname || !lastname || !email || !username || !password) {
@@ -91,7 +113,7 @@ users.patch("/:id", upload.single('profile_img'), async(req, res) => {
 });
 
 // delete user's data from db
-users.delete("/:id", async(req, res) => {
+users.delete("/:id", async (req, res) => {
     try {
         const userId = req.params.id;
 
@@ -104,5 +126,4 @@ users.delete("/:id", async(req, res) => {
     }
 });
 
-
-module.exports =  users;
+module.exports = users;
