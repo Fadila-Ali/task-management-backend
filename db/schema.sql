@@ -1,7 +1,7 @@
-DROP DATABASE IF EXISTS task_management;
-CREATE DATABASE task_management;
+DROP DATABASE IF EXISTS task_management_xvtg;
+CREATE DATABASE task_management_xvtg;
 
-\c task_management;
+\c task_management_xvtg;
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
