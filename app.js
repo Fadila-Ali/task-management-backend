@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const pgp = require('pg-promise')();
 const cors = require("cors");
@@ -24,7 +25,7 @@ const db = pgp(`postgres://${pgUser}:${pgPassword}@${pgHost}:${pgPort}/${pgDatab
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({ origin: ['http://localhost:3000'] }));
+app.use(cors({ origin: ['http://localhost:3000', 'https://task-maven.netlify.app'] }));
 app.use(morgan("tiny"));
 
 db.connect()
