@@ -1,7 +1,7 @@
-DROP DATABASE IF EXISTS task_maven;
-CREATE DATABASE task_maven;
+DROP DATABASE IF EXISTS task_management;
+CREATE DATABASE task_management;
 
-\c task_maven;
+\c task_management;
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
