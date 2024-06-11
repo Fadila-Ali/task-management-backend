@@ -21,6 +21,9 @@ const pgPassword = process.env.PG_PASSWORD;
 //! DATABASE CONNECTION
 const db = pgp(`postgres://${pgUser}:${pgPassword}@${pgHost}:${pgPort}/${pgDatabase}`);
 
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
 //! MIDDLEWARE
 app.use(express.json());
 app.use(bodyParser.json());

@@ -2,8 +2,6 @@ const { Router } = require("express");
 const multer = require('multer');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
-
 const {
     registerUser,
     loginUser,
@@ -13,29 +11,26 @@ const {
     deleteUser
 } = require("../queries/users");
 
-// Ensure the Images directory exists
-const imageDir = path.join(__dirname, '../Images');
-if (!fs.existsSync(imageDir)) {
-    fs.mkdirSync(imageDir);
-}
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, imageDir);
+    destination: function (req, file, cb){
+      cb(null, './Images')
     },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + uuidv4();
-        const extension = path.extname(file.originalname);
-        cb(null, uniqueSuffix + extension);
+    filename: function (req , file, cb){
+      const uniqueSuffix = Date.now() + '-' + uuidv4();
+      const extension = path.extname(file.originalname);
+      cb(null, uniqueSuffix + extension);
     }
-});
-
-const upload = multer({
+  })
+  
+  const upload = multer({
     storage,
     limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+      fieldSize: 25 * 1024 * 1024
     },
-});
+  });
+
 
 const users = Router();
 
@@ -92,20 +87,24 @@ users.get("/:id", async (req, res) => {
 });
 
 // update user's data
-users.patch("/:id", upload.single('profile_img'), async (req, res) => {
+users.put("/:id", upload.single('profile_img'), async (req, res) => {
     try {
-        const userId = req.params.id;
-        const { firstname, lastname, email, username, password } = req.body;
-        const profile_img = req.file ? req.file.filename : undefined;
+        // const userId = req.params.id;
+        // const { firstname, lastname, email, username, password } = req.body;
+        // const profile_img = req.file ? req.file.destination : undefined;
 
-        // Validate required fields
-        if (!firstname || !lastname || !email || !username || !password) {
-            return res.status(400).json({ error: "All fields are required" });
-        }
+        // // Validate required fields
+        // if (!firstname || !lastname || !email || !username || !password) {
+        //     return res.status(400).json({ error: "All fields are required" });
+        // }
 
-        const userToUpdate = await updateUser(userId, { firstname, lastname, email, username, password, profile_img });
-        console.table(userToUpdate);
-        res.status(200).json(userToUpdate);
+        // const userToUpdate = await updateUser(userId, { firstname, lastname, email, username, password, profile_img });
+        // console.table(userToUpdate);
+        // res.status(200).json(userToUpdate);
+
+        const { id } = req.params;
+        const updatedUser = await updateUser(id, req.body);
+        res.status(200).json(updatedUser);
     } catch (error) {
         console.error('Error updating user data: ', error);
         res.status(500).json({ error: 'Internal server error' });

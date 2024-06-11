@@ -95,8 +95,10 @@ const getUserById = async(userId) => {
     }
 }
 
-const updateUser = async(userId, { firstname, lastname, email, username, password, profile_img}) => {
+const updateUser = async(userId, userData) => {
     try {
+        const { firstname, lastname, email, username, password, profile_img} = userData;
+        
         // check if user exists in db
         const existingUser = await db.oneOrNone('SELECT * FROM users WHERE id=$1', userId);
         if (!existingUser) {
@@ -107,19 +109,19 @@ const updateUser = async(userId, { firstname, lastname, email, username, passwor
         // this can cause errors because many of the 'users' columns cannot be NULL
         // so I handle sign up to include all required columns, so that the first time I get data from user to store in each column
         // and use existing values if new ones are not provided during profile update
-        firstname = firstname || existingUser.firstname;
-        lastname = lastname || existingUser.lastname;
-        email = email || existingUser.email;
-        username = username || existingUser.username;
-        profile_img = profile_img || existingUser.profile_img;
+        // firstname = firstname || existingUser.firstname;
+        // lastname = lastname || existingUser.lastname;
+        // email = email || existingUser.email;
+        // username = username || existingUser.username;
+        // profile_img = profile_img || existingUser.profile_img;
 
-        // hash new password if the new provided is different from the one in db
-        if (password) {
-            const saltRounds = 10;
-            password = await bcrypt.hash(password, saltRounds);
-        } else {
-            password = existingUser.password;
-        }
+        // // hash new password if the new provided is different from the one in db
+        // if (password) {
+        //     const saltRounds = 10;
+        //     password = await bcrypt.hash(password, saltRounds);
+        // } else {
+        //     password = existingUser.password;
+        // }
 
         // update the user data if user is found
         const userToUpdate = await db.one(
@@ -132,7 +134,7 @@ const updateUser = async(userId, { firstname, lastname, email, username, passwor
         console.error('Error updating user: ', error);
         return error;
     }
-}
+};
 
 const deleteUser = async(userId) => {
     try {
